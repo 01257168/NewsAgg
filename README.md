@@ -1,7 +1,7 @@
 
   # NewsAgg
 
-## Running the Code
+## Installation
 1. Fork and clone repository
 2. Navigate to the `server` directory and create a .env file
 3. In the `.env` file, add your NewsAPI key in the format `API_KEY=your_newsapi_key`
