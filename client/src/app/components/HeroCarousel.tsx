@@ -57,7 +57,7 @@ export function HeroCarousel({ scrollY }: HeroCarouselProps) {
     if (isHovered || headlines.length === 0) return;
     const interval = setInterval(() => {
       setCurrent(p => (p + 1) % headlines.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [isHovered, headlines.length]);
 
@@ -121,7 +121,7 @@ export function HeroCarousel({ scrollY }: HeroCarouselProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.7 }}
           className="absolute bottom-0 left-0 right-0 p-6 z-10"
         >
           {!isCompact ? (
@@ -186,7 +186,7 @@ export function HeroCarousel({ scrollY }: HeroCarouselProps) {
           key={current}
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
-          transition={{ duration: 4, ease: 'linear' }}
+          transition={{ duration: 5, ease: 'linear' }}
           className="h-full bg-cyan-400"
         />
       </div>
