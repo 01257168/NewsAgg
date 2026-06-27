@@ -15,12 +15,14 @@ SPEC = SourceSpec(
     categories={
         "Sport":         ["https://www.bbc.com/sport"],
         "Health":        ["https://www.bbc.com/future"],
-        "Travel":        ["https://www.bbc.com/travel"],
         "Business":      ["https://www.bbc.com/business"],
         "World":         ["https://www.bbc.com/news/world"],
         "Politics":      ["https://www.bbc.com/news/politics"],
-        "Entertainment": ["https://www.bbc.com/arts"],
+        "Lifestyle":     ["https://www.bbc.com/arts", "https://www.bbc.com/travel"],
         "Science":       ["https://www.bbc.com/technology"],
+        # BBC has no single stable "climate" section index — verify this returns
+        # candidates on first run; fall back to a climate topic page if empty.
+        "Climate":       ["https://www.bbc.com/future-planet"],
     },
 )
 

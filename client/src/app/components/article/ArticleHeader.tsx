@@ -20,7 +20,8 @@ export function ArticleHeader({ article, isDark }: ArticleHeaderProps) {
   const mutedText = mutedTextClass(isDark);
   const bodyText = bodyTextClass(isDark);
   const sentimentStyle = SENTIMENT_STYLE[article.sentiment.type];
-  const topicBadgeClass = CATEGORY_BADGE_CLASS[TOPIC_TO_CATEGORY[article.topic]];
+  // Fallback guards legacy/unknown topics (e.g. pre-migration 'Travel').
+  const topicBadgeClass = CATEGORY_BADGE_CLASS[TOPIC_TO_CATEGORY[article.topic]] ?? 'bg-slate-600 text-white';
 
   const articleId = getArticleId(article);
   const isBookmarked = isArticleBookmarked(articleId);
@@ -62,7 +63,7 @@ export function ArticleHeader({ article, isDark }: ArticleHeaderProps) {
         )}
         <div className="min-w-0">
           <p className={`text-sm font-semibold ${isDark ? 'text-slate-100' : 'text-gray-900'}`}>{article.source.name}</p>
-          <p className={`text-xs ${mutedText}`}>{CATEGORY_LABELS[TOPIC_TO_CATEGORY[article.topic]]} coverage</p>
+          <p className={`text-xs ${mutedText}`}>{(CATEGORY_LABELS[TOPIC_TO_CATEGORY[article.topic]] ?? article.topic)} coverage</p>
         </div>
       </div>
 

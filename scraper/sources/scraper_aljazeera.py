@@ -22,6 +22,7 @@ SPEC = SourceSpec(
         "Business": ["https://www.aljazeera.com/economy/"],
         "World":    ["https://www.aljazeera.com/news/"],
         "Science":  ["https://www.aljazeera.com/tag/science-and-technology/"],
+        "Climate":  ["https://www.aljazeera.com/climate-crisis/"],
     },
 )
 

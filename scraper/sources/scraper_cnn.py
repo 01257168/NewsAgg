@@ -16,12 +16,12 @@ SPEC = SourceSpec(
     categories={
         "Sport":         ["https://edition.cnn.com/sport"],
         "Health":        ["https://edition.cnn.com/health"],
-        "Travel":        ["https://edition.cnn.com/travel"],
         "Business":      ["https://edition.cnn.com/business"],
         "World":         ["https://edition.cnn.com/world"],
         "Politics":      ["https://edition.cnn.com/politics"],
-        "Entertainment": ["https://edition.cnn.com/entertainment", "https://edition.cnn.com/style"],
+        "Lifestyle":     ["https://edition.cnn.com/entertainment", "https://edition.cnn.com/style", "https://edition.cnn.com/travel"],
         "Science":       ["https://edition.cnn.com/science"],
+        "Climate":       ["https://edition.cnn.com/climate"],
     },
 )
 

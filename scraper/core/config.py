@@ -129,10 +129,10 @@ SENTIMENT_MODEL_MAP: dict[str, str] = {
     "Business": "finance",
     "Sport": "general",
     "Health": "general",
-    "Travel": "general",
     "World": "general",
-    "Entertainment": "general",
+    "Lifestyle": "general",
     "Science": "general",
+    "Climate": "general",
     "Politics": "general",
 }
 
@@ -140,12 +140,12 @@ SENTIMENT_MODEL_MAP: dict[str, str] = {
 CATEGORY_LABELS: dict[str, list[str]] = {
     "Sport":         ["sports", "football", "basketball", "tennis", "cricket", "rugby", "golf", "olympics", "championship", "tournament", "match", "league", "player", "transfer", "injury", "world cup", "grand prix"],
     "Health":        ["health", "medicine", "disease", "illness", "treatment", "mental health", "nutrition", "diet", "fitness", "vaccine", "pandemic", "surgery", "healthcare", "cancer", "clinical trial"],
-    "Travel":        ["travel", "tourism", "destination", "adventure", "hotel", "flight", "vacation", "holiday", "explore", "trip", "tourist", "airline", "resort", "backpacking", "cruise", "road trip"],
     "Business":      ["business", "economy", "finance", "market", "stock", "investment", "trade", "company", "startup", "inflation", "GDP", "revenue", "profit", "merger", "cryptocurrency", "banking", "interest rate", "recession", "earnings", "tariff"],
     "World":         ["international", "conflict", "diplomacy", "government", "war", "global affairs", "foreign policy", "military", "sanctions", "treaty", "protest", "crisis", "humanitarian", "geopolitics", "refugee", "ceasefire", "summit", "coup", "democracy"],
     "Politics":      ["politics", "government", "election", "policy", "law", "congress", "senate", "parliament", "president", "prime minister", "campaign", "vote", "legislation", "white house", "referendum", "minister", "governance"],
-    "Entertainment": ["entertainment", "movies", "film", "music", "celebrity", "arts", "culture", "television", "streaming", "concert", "award", "fashion", "style", "Hollywood", "gaming", "pop culture", "album", "box office", "Oscars", "Grammy", "festival"],
-    "Science":       ["science", "technology", "research", "innovation", "artificial intelligence", "AI", "space", "climate change", "environment", "biology", "physics", "engineering", "robotics", "cybersecurity", "quantum computing", "genetics", "astronomy", "NASA", "machine learning", "renewable energy"],
+    "Lifestyle":     ["entertainment", "movies", "film", "music", "celebrity", "arts", "culture", "television", "streaming", "concert", "award", "fashion", "style", "Hollywood", "gaming", "pop culture", "album", "box office", "festival", "travel", "tourism", "destination", "hotel", "vacation", "holiday", "resort", "cruise", "cuisine", "food", "wellness", "lifestyle"],
+    "Science":       ["science", "technology", "research", "innovation", "artificial intelligence", "AI", "space", "biology", "physics", "engineering", "robotics", "cybersecurity", "quantum computing", "genetics", "astronomy", "NASA", "machine learning"],
+    "Climate":       ["climate change", "global warming", "environment", "emissions", "carbon", "renewable energy", "fossil fuels", "biodiversity", "extreme weather", "drought", "flood", "wildfire", "sea level", "sustainability", "COP", "greenhouse gas", "pollution", "conservation"],
 }
 
 # Canonical topic vocabulary (matches the live DB's existing rows).

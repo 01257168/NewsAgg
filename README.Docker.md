@@ -1,91 +1,59 @@
 # NewsAgg Docker Guide
 
-## Services
+`docker-compose.yml` menjalankan tiga service:
 
-`docker-compose.yml` sekarang menjalankan:
+| Service   | Isi                                   | Port host           |
+|-----------|---------------------------------------|---------------------|
+| `server`  | Express + NeonDB (TypeScript)         | `3000`              |
+| `client`  | Frontend Vite di-serve via Nginx      | `8080`              |
+| `scraper` | Pipeline Python (profile `scraper`)   | — (jalan on-demand) |
 
-1. `server` (Express + PostgreSQL/Neon) di port `3000` (default host port, bisa diubah)
-2. `client` (Nginx static frontend) di port `8080`
+Tidak ada PostgreSQL lokal — semua service memakai NeonDB lewat `NEONDB_URL`.
 
-## Required environment
+## Environment
 
-Docker Compose akan membaca environment dari file di bawah ini.
-
-### `server/.env`
-
-Minimal isi:
-
-```env
-API_KEY=your_newsapi_key
-DATABASE_URL=your_neon_postgres_url
-NEON_DSN=your_neon_postgres_url
-```
-
-### `server/.hf.env`
-
-Dipakai scraper Python:
+Compose membaca env dari **`server/.env`** (dipakai server *dan* scraper). Tidak ada
+`.hf.env` terpisah. Minimal yang harus terisi:
 
 ```env
-HF_TOKEN=your_huggingface_token
+NEONDB_URL=postgresql://...   # WAJIB — server & scraper
+JWT_SECRET=...                # WAJIB — server gagal boot di production tanpa ini
+HF_TOKEN=...                  # untuk scraper (model HuggingFace)
+# Sisanya (GROQ_API_KEY, GEMINI_API_KEY, GOOGLE_CLIENT_ID, FAVQS_API_KEY, MEM0_API_KEY)
+# opsional agar app menyala; fitur terkait nonaktif bila kosong.
 ```
 
- Docker Compose Build Steps
+URL API frontend di-inject saat build (`VITE_API_URL`, default `http://localhost:3000`).
+CORS server dibatasi ke `CLIENT_URL` (`http://localhost:8080`) — keduanya sudah diset di compose.
 
-  1. Verify server/.env has all required keys
+## Build & jalankan (dari root proyek)
 
-  Open server/.env and make sure these are filled in (not empty):
-  NEONDB_URL=postgresql://...        ← must be set
-  JWT_SECRET=...                     ← must be set
-  Everything else (Groq, Gemini, etc.) is optional for the app to start.
+```bash
+docker compose up --build
+```
 
-  2. Build and start (from the project root)
+Build pertama ~3–5 menit (server + client). Lalu akses:
 
-  docker compose up --build
-  This builds server + client images and starts both. First build takes ~3–5 minutes.
+| Service      | URL                            |
+|--------------|--------------------------------|
+| Client (app) | http://localhost:8080          |
+| Server API   | http://localhost:3000          |
+| Health check | http://localhost:3000/health   |
 
-  3. Access the app
+Stop: `docker compose down`
 
-  ┌──────────────┬──────────────────────────────┐
-  │   Service    │             URL              │
-  ├──────────────┼──────────────────────────────┤
-  │ Client (app) │ http://localhost:8080        │
-  ├──────────────┼──────────────────────────────┤
-  │ Server API   │ http://localhost:3000        │
-  ├──────────────┼──────────────────────────────┤
-  │ Health check │ http://localhost:3000/health │
-  └──────────────┴──────────────────────────────┘
+## Scraper (profile terpisah)
 
-  4. To stop
+```bash
+docker compose --profile scraper run --rm scraper
+```
 
-  docker compose down
+Model HuggingFace di-cache di volume `hf_cache` agar tak diunduh ulang tiap run.
 
-  5. Run the scraper (optional, separate profile)
+## Masalah umum
 
-  docker compose --profile scraper run --rm scraper
-
-  ---
-  Common issues
-
-  │ Server API   │ http://localhost:3000        │
-  ├──────────────┼──────────────────────────────┤
-  │ Health check │ http://localhost:3000/health │
-  └──────────────┴──────────────────────────────┘
-
-  4. To stop
-
-  docker compose down
-
-  5. Run the scraper (optional, separate profile)
-
-  docker compose --profile scraper run --rm scraper
-
-  ---
-  Common issues
-
-  "Cannot connect to Docker daemon" — Make sure Docker Desktop is running first.
-
-  Client shows blank/error — Check that NEONDB_URL is set in server/.env. Run docker compose logs server to see the error.
-
-  Rebuild after code changes — Always add --build flag: docker compose up --build
-
-  Port conflict — If 3000 or 8080 are taken, change the left-side ports in docker-compose.yml (e.g. "3001:3000").
+- **"Cannot connect to Docker daemon"** — pastikan Docker Desktop berjalan.
+- **Client blank / error** — cek `NEONDB_URL` di `server/.env`; lihat `docker compose logs server`.
+- **Server exit saat boot** — `JWT_SECRET` belum diset (`NODE_ENV=production` mewajibkannya).
+- **Perubahan kode tak muncul** — selalu pakai `--build`: `docker compose up --build`.
+- **Port bentrok** — ubah sisi kiri port di `docker-compose.yml` (mis. `"3001:3000"`).

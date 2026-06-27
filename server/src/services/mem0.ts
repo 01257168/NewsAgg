@@ -16,7 +16,7 @@ async function getClient(): Promise<any> {
   return clientPromise
 }
 
-const TOPIC_KEYWORDS = ['world', 'politics', 'business', 'technology', 'health', 'sport', 'science', 'entertainment', 'travel']
+const TOPIC_KEYWORDS = ['world', 'politics', 'business', 'health', 'sport', 'science', 'lifestyle', 'climate']
 
 export async function saveUserInterest(userId: string, article: {
   topic?: string

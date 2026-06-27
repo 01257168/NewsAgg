@@ -10,7 +10,7 @@ but the LIVE DB stores Title-case topics shared with CNN/BBC/AJ
 consistent, Chinese sections are mapped onto that existing vocabulary:
 
     政治 Politics | 財經 Business | 體育 Sport | 科技 Science
-    娛樂 Entertainment | 社會 World | 國際 World
+    娛樂 Lifestyle | 社會 World | 國際 World
 
 NOTE: Yahoo TW section paths change periodically — verify these URLs if a
 section returns no candidates. Requires the playwright package with the
@@ -44,7 +44,7 @@ _SECTIONS = {
     "財經": ("Business",      "https://tw.news.yahoo.com/finance"),
     "體育": ("Sport",         "https://tw.news.yahoo.com/sports"),
     "科技": ("Science",       "https://tw.news.yahoo.com/technology"),
-    "娛樂": ("Entertainment", "https://tw.news.yahoo.com/entertainment"),
+    "娛樂": ("Lifestyle",     "https://tw.news.yahoo.com/entertainment"),
     "社會": ("World",         "https://tw.news.yahoo.com/society"),
     "國際": ("World",         "https://tw.news.yahoo.com/world"),
 }

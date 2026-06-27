@@ -163,8 +163,14 @@ def enrich_article(item: dict, spec: SourceSpec) -> Optional[dict]:
         # Language first — sentiment/summary/toxicity are routed by it
         # (FinBERT/BART/toxic-bert are English-only; XLM-R models handle the rest).
         language = nlp.detect_language(text)
-        if spec.language != "en" and (not language or language == "en"):
-            language = spec.language          # trust the spec (e.g. yahoo_tw -> zh-TW)
+        # langdetect is unreliable on CJK — it frequently tags Traditional Chinese
+        # as 'ko'/'ja'/'zh-cn' and returns lowercase codes ('zh-tw'). For a source
+        # that declares a fixed non-English language, trust the spec UNLESS detection
+        # is confidently English (a rare English wire article in a zh section should
+        # still route to the English-only models). This also normalises casing
+        # (langdetect 'zh-tw' -> canonical spec 'zh-TW').
+        if spec.language != "en" and not (language or "").startswith("en"):
+            language = spec.language          # e.g. yahoo_tw -> zh-TW
 
         entities = nlp.run_ner(text)
         sentiment = nlp.analyze_sentiment(text, topic, language)
@@ -339,10 +345,17 @@ def run_source(
 
             if to_db:
                 try:
-                    status = db.insert_article(conn, record)
+                    # upsert_with_retry reconnects+retries once: Neon drops the
+                    # idle connection during the first article's model load, so
+                    # the first write of the run would otherwise abort the source.
+                    status, conn = db.upsert_with_retry(conn, record)
                     stats[status] = stats.get(status, 0) + 1
                 except Exception as e:              # noqa: BLE001
-                    conn.rollback()
+                    try:
+                        if conn is not None and not conn.closed:
+                            conn.rollback()
+                    except Exception:              # noqa: BLE001
+                        pass
                     stats["errors"] = stats.get("errors", 0) + 1
                     print(f"     DB insert error: {e}")
             cat_articles.append(record)

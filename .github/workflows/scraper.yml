@@ -1,16 +1,4 @@
-# Scheduled scraping + weekly DB cleanup.
-#
-# Secrets required (repo Settings -> Secrets and variables -> Actions):
-#   NEONDB_URL   Neon connection string (same value as server/.env)
-#   HF_TOKEN     HuggingFace token (model downloads; optional but avoids rate limits)
-#
-# Notes:
-# - CLAUDE.md's "0 */30 * * *" is an INVALID cron (hour field max 23); this
-#   runs daily instead. 12-hourly would also risk the 2000 free minutes/month
-#   since the HF model stack is heavy.
-# - HF models are ~4-6GB; the cache below keeps runs fast. Bump the key's
-#   version suffix whenever MODELS in scraper/core/config.py changes, so dead
-#   model weights don't ride along forever.
+
 name: Scraper
 
 on:
@@ -22,8 +10,12 @@ on:
       job:
         description: 'Which job to run'
         type: choice
-        options: [scrape, cleanup]
+        options: [scrape, cleanup, backfill-lang]
         default: scrape
+      target:
+        description: 'Articles per category per source (scrape only, default 20)'
+        type: number
+        default: 20
 
 concurrency:
   group: scraper
@@ -35,7 +27,12 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 2 * * *') ||
       (github.event_name == 'workflow_dispatch' && inputs.job == 'scrape')
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
+    strategy:
+      matrix:
+        source: [cnn, bbc, aljazeera, yahoo_tw]
+      fail-fast: false   # one source failing never blocks the others
+
     steps:
       - uses: actions/checkout@v4
 
@@ -49,7 +46,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
-          key: hf-models-v2
+          key: hf-models-v2-${{ hashFiles('scraper/core/config.py') }}
+          restore-keys: hf-models-v2-
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -63,11 +61,13 @@ jobs:
       - name: Install Playwright Chromium
         run: playwright install --with-deps chromium
 
-      - name: Run all sources
+      - name: Scrape ${{ matrix.source }}
         env:
           NEONDB_URL: ${{ secrets.NEONDB_URL }}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: python scraper/run_all.py
+        run: |
+          TARGET=${{ github.event.inputs.target || 20 }}
+          python scraper/run_single.py -s ${{ matrix.source }} --target $TARGET
 
   cleanup:
     if: >-
@@ -90,3 +90,26 @@ jobs:
         env:
           NEONDB_URL: ${{ secrets.NEONDB_URL }}
         run: python scraper/cleanup.py --days 45 --commit --vacuum
+
+  # One-off maintenance: normalise Yahoo TW articles mislabelled by langdetect
+  # ('ko'/'zh-tw'/…) to canonical 'zh-TW'. Idempotent — safe to re-run.
+  # Manual only (workflow_dispatch → job = backfill-lang).
+  backfill-lang:
+    if: github.event_name == 'workflow_dispatch' && inputs.job == 'backfill-lang'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # backfill_lang.py only imports core.config + psycopg2 (no ML stack)
+      - name: Install psycopg2
+        run: pip install psycopg2-binary
+
+      - name: Normalise Yahoo TW language codes
+        env:
+          NEONDB_URL: ${{ secrets.NEONDB_URL }}
+        run: python scraper/backfill_lang.py --source yahoo_tw --lang zh-TW --commit

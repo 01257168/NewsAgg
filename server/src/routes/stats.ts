@@ -10,7 +10,7 @@ export const statsRouter = Router()
 const statsCache = new TtlCache<any>(5 * 60 * 1000, 40)
 
 const TOPICS = new Set([
-  'Sport', 'Health', 'Travel', 'Business', 'World', 'Politics', 'Entertainment', 'Science',
+  'Sport', 'Health', 'Business', 'World', 'Politics', 'Lifestyle', 'Science', 'Climate',
 ])
 
 /** Normalise ?category= (client lowercase ids) to a live Title-case topic. */

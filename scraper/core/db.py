@@ -27,7 +27,14 @@ def get_dsn() -> Optional[str]:
 
 
 def connect():
-    """Open a psycopg2 connection to the live DB. Raises if no DSN configured."""
+    """Open a psycopg2 connection to the live DB. Raises if no DSN configured.
+
+    TCP keepalives are on because the FIRST article of a run downloads/loads
+    ~4-6GB of HuggingFace models before the first write — a long idle gap that
+    otherwise gets the connection reaped by Neon / intermediate proxies
+    ("connection already closed"). ``upsert_with_retry`` is the safety net for
+    drops that slip through anyway.
+    """
     import psycopg2
     dsn = get_dsn()
     if not dsn:
@@ -35,7 +42,13 @@ def connect():
             "No DB connection string. Set NEONDB_URL (or DATABASE_URL / NEON_DSN) "
             "in scraper/.env or server/.env."
         )
-    return psycopg2.connect(dsn)
+    return psycopg2.connect(
+        dsn,
+        keepalives=1,
+        keepalives_idle=30,
+        keepalives_interval=10,
+        keepalives_count=5,
+    )
 
 
 def column_exists(conn, table: str, column: str) -> bool:
@@ -208,6 +221,28 @@ def insert_article(conn, record: dict) -> str:
     if row is None:
         return "unchanged"           # WHERE guard filtered the update out
     return "inserted" if row[0] else "updated"
+
+
+def upsert_with_retry(conn, record: dict):
+    """``insert_article`` with one reconnect-and-retry.
+
+    Neon drops the single shared connection while the first article loads its
+    ~4-6GB model stack, so the first write of a run frequently hits
+    "connection already closed". On failure we roll back if we still can, open
+    a fresh connection and try exactly once more. Returns ``(status, conn)`` —
+    ``conn`` may be a NEW handle the caller must keep using for the rest of the
+    source (once models are loaded, writes are frequent and stay warm).
+    """
+    try:
+        return insert_article(conn, record), conn
+    except Exception:                               # noqa: BLE001
+        try:
+            if conn is not None and not conn.closed:
+                conn.rollback()
+        except Exception:                           # noqa: BLE001
+            pass                                    # rollback on a dead conn also raises
+        conn = connect()                            # reconnect (raises only if DSN vanished)
+        return insert_article(conn, record), conn
 
 
 def insert_all(dsn_or_conn, articles: list[dict]) -> int:

@@ -5,12 +5,12 @@ export const POSTS_ENABLED = true;
 export const CATEGORIES = [
   'sport',
   'health',
-  'travel',
   'business',
   'world',
   'politics',
-  'entertainment',
+  'lifestyle',
   'science',
+  'climate',
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];
@@ -18,23 +18,23 @@ export type Category = (typeof CATEGORIES)[number];
 export const CATEGORY_LABELS: Record<Category, string> = {
   sport: 'Sport',
   health: 'Health',
-  travel: 'Travel',
   business: 'Business',
   world: 'World',
   politics: 'Politics',
-  entertainment: 'Entertainment',
+  lifestyle: 'Lifestyle',
   science: 'Science',
+  climate: 'Climate',
 };
 
 export const CATEGORY_TOPIC_MAP = {
   sport: 'Sport',
   health: 'Health',
-  travel: 'Travel',
   business: 'Business',
   world: 'World',
   politics: 'Politics',
-  entertainment: 'Entertainment',
+  lifestyle: 'Lifestyle',
   science: 'Science',
+  climate: 'Climate',
 } as const;
 
 export type CategoryTopic = (typeof CATEGORY_TOPIC_MAP)[Category];
@@ -42,34 +42,34 @@ export type CategoryTopic = (typeof CATEGORY_TOPIC_MAP)[Category];
 export const TOPIC_TO_CATEGORY: Record<CategoryTopic, Category> = {
   Sport: 'sport',
   Health: 'health',
-  Travel: 'travel',
   Business: 'business',
   World: 'world',
   Politics: 'politics',
-  Entertainment: 'entertainment',
+  Lifestyle: 'lifestyle',
   Science: 'science',
+  Climate: 'climate',
 };
 
 export const CATEGORY_BADGE_CLASS: Record<Category, string> = {
   sport: 'bg-orange-500 text-white',
-  health: 'bg-emerald-700 text-white',
-  travel: 'bg-amber-500 text-white',
+  health: 'bg-emerald-600 text-white',
   business: 'bg-indigo-600 text-white',
   world: 'bg-slate-600 text-white',
   politics: 'bg-sky-600 text-white',
-  entertainment: 'bg-fuchsia-600 text-white',
-  science: 'bg-teal-700 text-white',
+  lifestyle: 'bg-fuchsia-600 text-white',
+  science: 'bg-teal-600 text-white',
+  climate: 'bg-green-600 text-white',
 };
 
 export const TOPIC_BADGE_CLASS: Record<CategoryTopic, string> = {
   Sport: CATEGORY_BADGE_CLASS.sport,
   Health: CATEGORY_BADGE_CLASS.health,
-  Travel: CATEGORY_BADGE_CLASS.travel,
   Business: CATEGORY_BADGE_CLASS.business,
   World: CATEGORY_BADGE_CLASS.world,
   Politics: CATEGORY_BADGE_CLASS.politics,
-  Entertainment: CATEGORY_BADGE_CLASS.entertainment,
+  Lifestyle: CATEGORY_BADGE_CLASS.lifestyle,
   Science: CATEGORY_BADGE_CLASS.science,
+  Climate: CATEGORY_BADGE_CLASS.climate,
 };
 
 // ─── Sources ────────────────────────────────────────────────────────────────
